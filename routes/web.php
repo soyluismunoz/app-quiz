@@ -20,3 +20,17 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::group(['middleware' => ['auth']], function () {
+
+ });
+
+Route::get('/registro-participante', function () {
+    return view('participant');
+})->name('participant');
+
+Route::post('/add-participant', 'ParticipantController@addParticipant')->name('addParticipant');
+
+// api - routes
+Route::get('all-quizes-act', 'QuizController@getQuizes');
+Route::get('quiz/{slug}', 'QuizController@getQuiz');
