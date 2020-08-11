@@ -7,9 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Question extends Model
 {
     protected $table = 'questions';
-    protected $fillable = ['title'];
+    protected $fillable = ['quiz_id', 'title', 'min', 'seg' ];
 
-    public function answer() {
+    public function quiz() {
+        return $this->hasOne('App\Quiz', 'id', 'quiz_id');
+    }
+
+    public function answers() {
         return $this->hasMany('App\Answer', 'question_id', 'id');
     }
 
@@ -19,9 +23,5 @@ class Question extends Model
 
     public function correctAnswer() {
        return  $this->Answer()->where('correct', 1)->get();
-    }
-
-    public function quiz() {
-        return $this->hasOne('App\Quiz', 'id', 'quiz_id');
     }
 }

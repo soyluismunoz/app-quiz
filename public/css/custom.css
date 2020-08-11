@@ -5,8 +5,54 @@ html, body {
     font-weight: 200;
     height: 100vh;
     margin: 0;
+    overflow-x: hidden;
 }
 
+/* all quizes*/
+.quizes{
+    margin: 5px 10px;
+    padding: 3.5rem;
+}
+.quizes a{
+    text-decoration: none;
+    color: #333333;
+    -webkit-box-shadow: 0 0 10px 1px #BABABA00;
+    box-shadow: 0 0 10px 1px #BABABA00;
+}
+
+.quizes a:hover{
+    -webkit-box-shadow: 0 0 10px 1px #BABABA;
+    box-shadow: 0 0 10px 1px #BABABA;
+}
+/* all quizes*/
+
+/* single quiz*/
+.quiz{
+    background-color: #CFD8DC;
+}
+
+.quiz .option{
+    border-radius: 50px;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #F7F7F7;
+    margin-bottom: 10px;
+    transition: all ease-in .5s;
+}
+
+.quiz .option:hover{
+    background-color: #ededed;
+    cursor: pointer;
+}
+
+.is-selected {
+    border: 1px solid #BABABA;
+    background-color: #fff !important;
+    -webkit-box-shadow: 0 0 10px 1px #BABABA;
+    box-shadow: 0 0 3px 1px #BABABA;
+}
+
+/* single quiz*/
 .full-height {
     height: 100vh;
 }

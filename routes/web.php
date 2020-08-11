@@ -23,6 +23,13 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::group(['middleware' => ['auth']], function () {
 
+    Route::get('/quiz/{slug}', function () {
+        return view('quiz.show');
+    })->name('show-quiz');
+
+    // api - routes
+    Route::get('all-quizes-act', 'QuizController@getQuizes');
+    Route::get('show-quiz/{slug}', 'QuizController@getQuiz');
  });
 
 Route::get('/registro-participante', function () {
@@ -31,6 +38,3 @@ Route::get('/registro-participante', function () {
 
 Route::post('/add-participant', 'ParticipantController@addParticipant')->name('addParticipant');
 
-// api - routes
-Route::get('all-quizes-act', 'QuizController@getQuizes');
-Route::get('quiz/{slug}', 'QuizController@getQuiz');

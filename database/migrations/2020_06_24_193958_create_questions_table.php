@@ -17,6 +17,8 @@ class CreateQuestionsTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('quiz_id')->unsigned()->nullable();;
             $table->text('title');
+            $table->integer('min')->unsigned()->default(1);
+            $table->integer('seg')->unsigned()->default(00);
             $table->timestamps();
 
             $table->index('quiz_id');

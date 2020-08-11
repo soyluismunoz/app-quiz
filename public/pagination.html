@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pagination</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css">
+    <style>
+        table thead {
+            font-weight: bold;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <form class="form-inline">
+            <input type="text" class="form-control " placeholder="Search" v-model="search_filter" @keyup="updatePaginate">
+            <button @click.prevent="setStatus('')">All</button>
+            <button @click.prevent="setStatus('DC')">DC</button>
+            <button @click.prevent="setStatus('Marvel')">Marvel</button>
+        </form>
+        
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <td>Hero Name</td>
+                <td>Universe</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="hero in heroes | filterBy search_filter in 'name' | filterBy status_filter in 'universe'" v-show="setPaginate($index)">
+                <td>{{ hero.name }}</td>
+                <td>{{ hero.universe }}</td>
+            </tr>
+            </tbody>
+        </table>
+        <div id="pagination">
+            <a href="#" class="btn btn-default" v-for="page_index in paginate_total" @click.prevent="updateCurrent(page_index + 1)">
+            {{ page_index + 1 }}
+            </a>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            created() {
+                this.paginate_total = this.heroes.length/this.paginate;
+            },
+            data: {
+                current: 1,
+                heroes: [
+                    { name: 'Wolverine', universe: 'Marvel'},
+                    { name: 'Batman', universe: 'DC' },
+                    { name: 'Beast', universe: 'Marvel'},
+                    { name: 'Superman', universe: 'DC' },
+                    { name: 'Wonder Woman', universe: 'DC' },
+                    { name: 'Iceman', universe: 'Marvel'},
+                    { name: 'Black Panther', universe: 'Marvel'},
+                    { name: 'Beast Boy', universe: 'DC' },
+                    { name: 'Captain America', universe: 'Marvel'},
+                    { name: 'Hawkgirl', universe: 'DC' },
+                    { name: 'Cyclops', universe: 'Marvel'},
+                    { name: 'Green Lantern', universe: 'DC' },
+                    { name: 'Thor', universe: 'Marvel'},
+                    { name: 'Flash', universe: 'DC' },
+                    { name: 'Spider-man', universe: 'Marvel'},
+                    { name: 'Martian Manhunter', universe: 'DC' },
+                    { name: 'Nightwing', universe: 'DC' },
+                    { name: 'Raven', universe: 'DC' },
+                    { name: 'Hulk', universe: 'Marvel'},
+                    { name: 'Shehulk', universe: 'Marvel'}
+                ],
+                paginate: 5,
+                paginate_total: 0,
+                search_filter: '',
+                status_filter: ''
+            },
+            methods: {
+                setPaginate: function (i) {
+                    if (this.current == 1) {
+                        return i < this.paginate;
+                    }
+                    else {
+                        return (i >= (this.paginate * (this.current - 1)) && i < (this.current * this.paginate));
+                    }
+                },
+                setStatus: function (status) {
+                    this.status_filter = status;
+                    this.$nextTick(function () {
+                        this.updatePaginate();
+                    });
+                },
+                updateCurrent: function (i) {
+                    this.current = i;
+                },
+                updatePaginate: function () {
+                    this.current = 1;
+                    this.paginate_total = Math.ceil(document.querySelectorAll('tbody tr').length/this.paginate);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

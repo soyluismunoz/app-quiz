@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Quiz;
+
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class QuizController extends Controller
@@ -12,10 +14,14 @@ class QuizController extends Controller
         return $quizes;
     }
 
-    public function getQuiz($slug)
-    {
-        $quiz = Quiz::where('slug', $slug)->with('questions', 'questions.answer')->get();
-        return $quiz;
+    public function getQuiz($slug){
+        $user = Auth::user();
+        $quiz = Quiz::where('slug', $slug)->with('questions', 'questions.answers')->first();
+        
+        return [
+            'quiz'  => $quiz,
+            'user'  => $user
+        ];
     }
 
     public function store(Request $request)

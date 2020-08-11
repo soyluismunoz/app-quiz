@@ -16,6 +16,7 @@ class CreateQuizzesTable extends Migration
         Schema::create('quizzes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('title')->nullable();
+            $table->string('description')->nullable();
             $table->string('slug')->nullable();
             $table->enum('status', ['active', 'inactive'])->nullable()->default('inactive');
             $table->timestamps();
