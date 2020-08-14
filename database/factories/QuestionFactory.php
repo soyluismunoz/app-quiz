@@ -10,7 +10,5 @@ $factory->define(Question::class, function (Faker $faker) {
     return [
         'title'     => $name ,
         'quiz_id'   => rand(1, 6),
-        'min'       => rand(1, 5),
-        'seg'       => rand(0, 60)
     ];
 });

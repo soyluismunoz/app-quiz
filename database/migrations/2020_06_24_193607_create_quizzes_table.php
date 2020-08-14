@@ -18,6 +18,9 @@ class CreateQuizzesTable extends Migration
             $table->string('title')->nullable();
             $table->string('description')->nullable();
             $table->string('slug')->nullable();
+            $table->integer('hour')->unsigned()->default(0);
+            $table->integer('min')->unsigned()->default(1);
+            $table->integer('seg')->unsigned()->default(00);
             $table->enum('status', ['active', 'inactive'])->nullable()->default('inactive');
             $table->timestamps();
         });

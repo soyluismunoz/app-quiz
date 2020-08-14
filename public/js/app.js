@@ -2002,18 +2002,48 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       questionIndex: 0,
-      userResponses: '',
+      skippedQues: [],
       end: false,
+      userResponses: '',
+      load: true,
+      time: "",
+      hour: "",
+      min: "",
+      seg: "",
       user: '',
-      quizLength: 10,
-      quiz: ''
+      quiz: {
+        questions: [{
+          answers: [{
+            answer: " "
+          }]
+        }]
+      }
     };
   },
   mounted: function mounted() {
+    var self = this;
     var slug = localStorage.getItem('QuizSlug');
 
     if (slug) {
@@ -2028,16 +2058,31 @@ __webpack_require__.r(__webpack_exports__);
     }
 
     this.getQuiz(url);
-    this.userResponses = Array(this.quizLength.length).fill(null);
+    setTimeout(function () {
+      if (self.quiz) {
+        //localStorage.removeItem('QuizSlug')
+        self.load = false;
+      }
+
+      self.userResponses = Array(self.quiz.questions.length).fill(null);
+      console.log(self.userResponses);
+      self.takeTime();
+    }, 1000);
   },
   methods: {
     // pagination
     next: function next() {
       if (this.questionIndex < this.quiz.questions.length) {
         this.questionIndex++;
-      } else {
-        this.score();
       }
+    },
+    skip: function skip(index) {
+      this.skippedQues.push(index);
+      this.next();
+      console.log(index);
+    },
+    selectSkipped: function selectSkipped(index) {
+      this.questionIndex = index;
     },
     prev: function prev() {
       if (this.quiz.questions.length > 0) this.questionIndex--;
@@ -2048,7 +2093,6 @@ __webpack_require__.r(__webpack_exports__);
     restart: function restart() {
       this.questionIndex = 0;
       this.userResponses = Array(this.quiz.questions.length).fill(null);
-      this.end = false;
     },
     // select answer
     selectAnswer: function selectAnswer(index) {
@@ -2057,12 +2101,12 @@ __webpack_require__.r(__webpack_exports__);
     },
     // End and final score
     score: function score() {
-      this.end = true;
+      this.skippedQues = [];
       var score = 0;
       var i = 0;
 
-      for (i < this.userResponses.length; i++;) {
-        if (typeof this.quiz.questions[i].answers[this.userResponses[i]] !== "undefined" && this.quiz.questions[i].answers[this.userResponses[i]].correct) {
+      for (var _i = 0; _i < this.userResponses.length; _i++) {
+        if (typeof this.quiz.questions[_i].answers[this.userResponses[_i]] !== "undefined" && this.quiz.questions[_i].answers[this.userResponses[_i]].correct != 0) {
           score = score + 1;
         }
       }
@@ -2078,10 +2122,40 @@ __webpack_require__.r(__webpack_exports__);
 
       axios.get('/show-quiz/' + url).then(function (response) {
         _this.quiz = response.data.quiz;
-        _this.user = response.data.user; //localStorage.removeItem('QuizSlug')
+        _this.user = response.data.user;
+        _this.hour = response.data.quiz.hour;
+        _this.min = response.data.quiz.min;
+        _this.seg = response.data.quiz.seg; //localStorage.removeItem('QuizSlug')
       })["catch"](function (e) {
         console.log(e);
       });
+    },
+    // Temporizador
+    takeTime: function takeTime() {
+      var timeout;
+      var self = this;
+      var hour = self.hour;
+      var min = self.min;
+      var seg = self.seg;
+      var n = hour * 3600 + min * 60 + seg;
+      timeout = window.setInterval(function () {
+        self.secondsToString(n);
+        n--;
+
+        if (n == 0) {
+          clearTimeout(timeout);
+          self.questionIndex = self.quiz.questions.length;
+        }
+      }, 1000);
+    },
+    secondsToString: function secondsToString(seconds) {
+      var hour = Math.floor(seconds / 3600);
+      hour = hour < 10 ? '0' + hour : hour;
+      var minute = Math.floor(seconds / 60 % 60);
+      minute = minute < 10 ? '0' + minute : minute;
+      var second = seconds % 60;
+      second = second < 10 ? '0' + second : second;
+      this.time = hour + ':' + minute + ':' + second;
     }
   }
 });
@@ -2147,6 +2221,42 @@ __webpack_require__.r(__webpack_exports__);
     saveSlug: function saveSlug(href) {
       var slug = JSON.stringify(href);
       localStorage.setItem('QuizSlug', slug);
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Timer.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Timer.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ['time'],
+  filters: {
+    prettify: function prettify(value) {
+      var data = value.split(':');
+      var minutes = data[0];
+      var secondes = data[1];
+
+      if (minutes < 10) {
+        minutes = "0" + minutes;
+      }
+
+      if (secondes < 10) {
+        secondes = "0" + secondes;
+      }
+
+      return minutes + ":" + secondes;
     }
   }
 });
@@ -37736,267 +37846,333 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("section", { staticClass: "section quiz" }, [
-    _c("div", { staticClass: "container" }, [
+    _c("div", { staticClass: "container-fluid px-5" }, [
       _c("div", { staticClass: "row justify-content-center" }, [
-        _c("div", { staticClass: "col-lg-8 my-5" }, [
-          !_vm.end
-            ? _c("div", { staticClass: "card shadow-lg rounded" }, [
-                _c("div", { staticClass: "card-header text-center py-5" }, [
-                  _c("h2", {
-                    staticClass: "font-weight-bold",
-                    domProps: { textContent: _vm._s(_vm.quiz.title) }
-                  }),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "mx-auto px-5 py-2" }, [
-                    _c("div", { staticClass: "progress" }, [
-                      _c(
-                        "div",
-                        {
-                          staticClass: "progress-bar",
-                          style:
-                            "width:" +
-                            Math.trunc(
-                              (_vm.questionIndex / _vm.quiz.questions.length) *
-                                100
-                            ) +
-                            "%;",
-                          attrs: {
-                            role: "progressbar",
-                            "aria-valuemin": "0",
-                            "aria-valuemax": "100"
-                          }
-                        },
-                        [
-                          _vm._v(
-                            "\n                                    " +
-                              _vm._s(
-                                Math.trunc(
-                                  (_vm.questionIndex /
-                                    _vm.quiz.questions.length) *
-                                    100
-                                ) + "% Completado"
-                              ) +
-                              "\n                                "
-                          )
-                        ]
-                      )
-                    ])
-                  ])
-                ]),
+        _vm.skippedQues.length > 0
+          ? _c("div", { staticClass: "col-lg-4 mt-5 skipped" }, [
+              _c("div", { staticClass: "card shadow rounded" }, [
+                _vm._m(0),
                 _vm._v(" "),
-                _vm.quiz.questions.length > 0
-                  ? _c("div", { staticClass: "card-body text-center" }, [
-                      _c("div", { staticClass: "d-flex justify-content-end" }, [
-                        _c("small", [
-                          _vm._v(
-                            " \n                                Tiempo para responder esta pregunta \n                                "
-                          ),
-                          _c("b", [
-                            _vm._v(
-                              "\n                                   " +
-                                _vm._s(
-                                  _vm.quiz.questions[_vm.questionIndex].min
-                                ) +
-                                " :\n                                   " +
-                                _vm._s(
-                                  _vm.quiz.questions[_vm.questionIndex].seg
-                                ) +
-                                "\n                                "
-                            )
-                          ])
-                        ])
-                      ]),
-                      _vm._v(" "),
-                      _c("h2", {
-                        staticClass: "card-title",
-                        domProps: {
-                          textContent: _vm._s(
-                            _vm.quiz.questions[_vm.questionIndex].title
-                          )
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        { staticClass: "row justify-content-center options" },
-                        _vm._l(
-                          _vm.quiz.questions[_vm.questionIndex].answers,
-                          function(a, index) {
-                            return _c(
-                              "div",
-                              {
-                                key: index,
-                                staticClass: "col-lg-10 option",
-                                class: {
-                                  "is-selected":
-                                    _vm.userResponses[_vm.questionIndex] ==
-                                    index
-                                },
-                                on: {
-                                  click: function($event) {
-                                    return _vm.selectAnswer(index)
-                                  }
-                                }
-                              },
-                              [
-                                _vm._v(
-                                  "\n                               " +
-                                    _vm._s(a.answer) +
-                                    "\n                            "
-                                )
-                              ]
-                            )
-                          }
-                        ),
-                        0
-                      )
-                    ])
-                  : _vm._e(),
-                _vm._v(" "),
-                _c("div", { staticClass: "card-footer" }, [
-                  _c("div", { staticClass: "d-flex justify-content-between" }, [
-                    _c(
-                      "button",
-                      {
-                        staticClass: "btn btn-primary rounded-pill",
-                        attrs: { disabled: _vm.questionIndex < 1 },
-                        on: {
-                          click: function($event) {
-                            return _vm.prev()
-                          }
-                        }
-                      },
-                      [
-                        _vm._v(
-                          "\n                                Anterior\n                            "
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "card-body p-0 overflow-auto",
+                    staticStyle: { "max-height": "520px" }
+                  },
+                  [
                     _c(
                       "ul",
-                      { staticClass: "pagination m-0" },
-                      _vm._l(_vm.quiz.questions.length, function(r, index) {
+                      { staticClass: "list-group list-group-flush" },
+                      _vm._l(_vm.skippedQues, function(sQ) {
                         return _c(
-                          "li",
+                          "a",
                           {
-                            key: r.index,
-                            staticClass: "page-item",
-                            class: index == _vm.questionIndex ? "active" : "",
-                            attrs: {
-                              "aria-current": "page",
-                              id: "act-" + index
+                            key: sQ,
+                            staticClass:
+                              "list-group-item list-group-item-action skipped-item",
+                            on: {
+                              click: function($event) {
+                                return _vm.selectSkipped(sQ)
+                              }
                             }
                           },
                           [
-                            _c(
-                              "a",
-                              {
-                                staticClass: "page-link",
-                                on: {
-                                  click: function($event) {
-                                    return _vm.goQuestion(index)
-                                  }
-                                }
-                              },
-                              [
-                                _vm._v(
-                                  "\n                                        " +
-                                    _vm._s(index + 1) +
-                                    "\n                                    "
-                                )
-                              ]
+                            _vm._v(
+                              "\n                                " +
+                                _vm._s(_vm.quiz.questions[sQ].title) +
+                                "\n                            "
                             )
                           ]
                         )
                       }),
                       0
-                    ),
+                    )
+                  ]
+                )
+              ])
+            ])
+          : _vm._e(),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-lg-8 mt-5" }, [
+          _vm.questionIndex < _vm.quiz.questions.length
+            ? _c(
+                "div",
+                {
+                  key: _vm.questionIndex,
+                  staticClass: "card shadow-lg rounded"
+                },
+                [
+                  _c("div", { staticClass: "card-header text-center py-5" }, [
+                    _c("h2", {
+                      staticClass: "font-weight-bold",
+                      domProps: { textContent: _vm._s(_vm.quiz.title) }
+                    }),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "mx-auto px-5 py-2" }, [
+                      _c("div", { staticClass: "progress" }, [
+                        _c(
+                          "div",
+                          {
+                            staticClass: "progress-bar",
+                            style:
+                              "width:" +
+                              Math.trunc(
+                                (_vm.questionIndex /
+                                  _vm.quiz.questions.length) *
+                                  100
+                              ) +
+                              "%;",
+                            attrs: {
+                              role: "progressbar",
+                              "aria-valuemin": "0",
+                              "aria-valuemax": "100"
+                            }
+                          },
+                          [
+                            _vm._v(
+                              "\n                                    " +
+                                _vm._s(
+                                  Math.trunc(
+                                    (_vm.questionIndex /
+                                      _vm.quiz.questions.length) *
+                                      100
+                                  ) + "% Completado"
+                                ) +
+                                "\n                                "
+                            )
+                          ]
+                        )
+                      ])
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  !_vm.load
+                    ? _c("div", { staticClass: "card-body text-center" }, [
+                        _c(
+                          "div",
+                          { staticClass: "d-flex justify-content-end" },
+                          [
+                            _c("p", [
+                              _vm._v(" Tiempo para realizar la prueba "),
+                              _c("strong", {
+                                domProps: { textContent: _vm._s(_vm.time) }
+                              })
+                            ])
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c("h2", {
+                          staticClass: "card-title",
+                          domProps: {
+                            textContent: _vm._s(
+                              _vm.quiz.questions[_vm.questionIndex].title
+                            )
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "row justify-content-center options" },
+                          _vm._l(
+                            _vm.quiz.questions[_vm.questionIndex].answers,
+                            function(a, index) {
+                              return _c(
+                                "div",
+                                {
+                                  key: index,
+                                  staticClass: "col-lg-10 option",
+                                  class: {
+                                    "is-selected":
+                                      _vm.userResponses[_vm.questionIndex] ==
+                                      index
+                                  },
+                                  on: {
+                                    click: function($event) {
+                                      return _vm.selectAnswer(index)
+                                    }
+                                  }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                               " +
+                                      _vm._s(a.answer) +
+                                      "\n                            "
+                                  )
+                                ]
+                              )
+                            }
+                          ),
+                          0
+                        )
+                      ])
+                    : _c("div", { staticClass: "card-body text-center" }, [
+                        _vm._m(1)
+                      ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "card-footer" }, [
+                    _c(
+                      "div",
+                      { staticClass: "d-flex justify-content-between" },
+                      [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-primary rounded-pill",
+                            attrs: { disabled: _vm.questionIndex < 1 },
+                            on: {
+                              click: function($event) {
+                                return _vm.prev()
+                              }
+                            }
+                          },
+                          [
+                            _vm._v(
+                              "\n                                Anterior\n                            "
+                            )
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "ul",
+                          { staticClass: "pagination m-0" },
+                          _vm._l(_vm.quiz.questions.length, function(r, index) {
+                            return _c(
+                              "li",
+                              {
+                                key: r.index,
+                                staticClass: "page-item",
+                                class:
+                                  index == _vm.questionIndex ? "active" : "",
+                                attrs: {
+                                  "aria-current": "page",
+                                  id: "act-" + index
+                                }
+                              },
+                              [
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "page-link",
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.goQuestion(index)
+                                      }
+                                    }
+                                  },
+                                  [
+                                    _vm._v(
+                                      "\n                                        " +
+                                        _vm._s(index + 1) +
+                                        "\n                                    "
+                                    )
+                                  ]
+                                )
+                              ]
+                            )
+                          }),
+                          0
+                        ),
+                        _vm._v(" "),
+                        _vm.userResponses[_vm.questionIndex] != null
+                          ? _c(
+                              "button",
+                              {
+                                staticClass: "btn rounded-pill btn-success",
+                                on: {
+                                  click: function($event) {
+                                    return _vm.next()
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                               Siguiente\n                            "
+                                )
+                              ]
+                            )
+                          : _c(
+                              "button",
+                              {
+                                staticClass: "btn rounded-pill btn-secondary",
+                                on: {
+                                  click: function($event) {
+                                    return _vm.skip(_vm.questionIndex)
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                                Omitir\n                            "
+                                )
+                              ]
+                            )
+                      ]
+                    )
+                  ])
+                ]
+              )
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.questionIndex >= _vm.quiz.questions.length
+            ? _c(
+                "div",
+                {
+                  key: _vm.questionIndex,
+                  staticClass: "card shadow-lg rounded py-5"
+                },
+                [
+                  _c("div", { staticClass: "align-self-center text-center" }, [
+                    _c("i", {
+                      staticClass: "fas",
+                      class:
+                        _vm.score() > 3
+                          ? "fa-check-circle-o is-active"
+                          : "fa-times-circle"
+                    }),
+                    _vm._v(" "),
+                    _c("hr"),
+                    _vm._v(" "),
+                    _c("h3", [
+                      _vm._v(
+                        "\n                            You did " +
+                          _vm._s(
+                            _vm.score() > 7 ? "Asombroso" : "Mejor suerte luego"
+                          ) +
+                          " " +
+                          _vm._s(_vm.score() > 4 ? "a good" : "a poor") +
+                          " job!\n                        "
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("p", [
+                      _vm._v(
+                        "\n                           Puntuacion total : " +
+                          _vm._s(_vm.score()) +
+                          " / " +
+                          _vm._s(_vm.quiz.questions.length) +
+                          "\n                        "
+                      )
+                    ]),
                     _vm._v(" "),
                     _c(
                       "button",
                       {
-                        staticClass: "btn rounded-pill",
-                        class:
-                          _vm.userResponses[_vm.questionIndex] == null
-                            ? "btn-secondary"
-                            : "btn-success",
-                        attrs: {
-                          disabled:
-                            _vm.questionIndex >= _vm.quiz.questions.length
-                        },
+                        staticClass: "btn btn-primary",
                         on: {
                           click: function($event) {
-                            return _vm.next()
+                            return _vm.restart()
                           }
                         }
                       },
                       [
-                        _vm._v(
-                          "\n                                " +
-                            _vm._s(
-                              _vm.userResponses[_vm.questionIndex] == null
-                                ? "Omitir"
-                                : "Siguiente"
-                            ) +
-                            "\n                            "
-                        )
+                        _vm._v("\n                            Reiniciar "),
+                        _c("i", { staticClass: "fas fa-refresh" })
                       ]
                     )
                   ])
-                ])
-              ])
-            : _c("div", { staticClass: "card shadow-lg rounded py-5" }, [
-                _c("div", { staticClass: "align-self-center text-center" }, [
-                  _c("i", {
-                    staticClass: "fas",
-                    class:
-                      _vm.score() > 3
-                        ? "fa-check-circle-o is-active"
-                        : "fa-times-circle"
-                  }),
-                  _vm._v(" "),
-                  _c("hr"),
-                  _vm._v(" "),
-                  _c("h3", [
-                    _vm._v(
-                      "\n                            You did " +
-                        _vm._s(
-                          _vm.score() > 7 ? "Asombroso" : "Mejor suerte luego"
-                        ) +
-                        " " +
-                        _vm._s(_vm.score() > 4 ? "a good" : "a poor") +
-                        " job!\n                        "
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("p", [
-                    _vm._v(
-                      "\n                           Puntuacion total : " +
-                        _vm._s(_vm.score()) +
-                        " / " +
-                        _vm._s(_vm.quiz.questions.length) +
-                        "\n                        "
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c(
-                    "button",
-                    {
-                      staticClass: "btn btn-primary",
-                      on: {
-                        click: function($event) {
-                          return _vm.restart()
-                        }
-                      }
-                    },
-                    [
-                      _vm._v("\n                            Reiniciar "),
-                      _c("i", { staticClass: "fas fa-refresh" })
-                    ]
-                  )
-                ])
-              ])
+                ]
+              )
+            : _vm._e()
         ])
       ])
     ]),
@@ -38006,7 +38182,37 @@ var render = function() {
     ])
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "card-header text-center" }, [
+      _c("h3", { staticClass: "card-title m-0" }, [
+        _vm._v(
+          "\n                           Preguntas Omitidas \n                       "
+        )
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      {
+        staticClass: "row justify-content-center",
+        staticStyle: { height: "250px" }
+      },
+      [
+        _c("div", { staticClass: "col-lg-4 align-self-center" }, [
+          _c("i", { staticClass: "fas fa-spinner fa-spin fa-6x" })
+        ])
+      ]
+    )
+  }
+]
 render._withStripped = true
 
 
@@ -38091,6 +38297,32 @@ var staticRenderFns = [
     ])
   }
 ]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Timer.vue?vue&type=template&id=54f9552c&":
+/*!********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Timer.vue?vue&type=template&id=54f9552c& ***!
+  \********************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "timer" }, [
+    _vm._v(_vm._s(_vm._f("prettify")(_vm.time)))
+  ])
+}
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -50271,6 +50503,7 @@ __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
 Vue.component('all-quizes', __webpack_require__(/*! ./components/Quizes.vue */ "./resources/js/components/Quizes.vue")["default"]);
 Vue.component('show-quiz', __webpack_require__(/*! ./components/Quiz.vue */ "./resources/js/components/Quiz.vue")["default"]);
+Vue.component('timer', __webpack_require__(/*! ./components/Timer.vue */ "./resources/js/components/Timer.vue")["default"]);
 var app = new Vue({
   el: '#app'
 });
@@ -50455,6 +50688,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Quizes_vue_vue_type_template_id_d3c9fb24___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Quizes_vue_vue_type_template_id_d3c9fb24___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/Timer.vue":
+/*!*******************************************!*\
+  !*** ./resources/js/components/Timer.vue ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Timer_vue_vue_type_template_id_54f9552c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Timer.vue?vue&type=template&id=54f9552c& */ "./resources/js/components/Timer.vue?vue&type=template&id=54f9552c&");
+/* harmony import */ var _Timer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Timer.vue?vue&type=script&lang=js& */ "./resources/js/components/Timer.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _Timer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Timer_vue_vue_type_template_id_54f9552c___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _Timer_vue_vue_type_template_id_54f9552c___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/Timer.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/Timer.vue?vue&type=script&lang=js&":
+/*!********************************************************************!*\
+  !*** ./resources/js/components/Timer.vue?vue&type=script&lang=js& ***!
+  \********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Timer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./Timer.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Timer.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Timer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/Timer.vue?vue&type=template&id=54f9552c&":
+/*!**************************************************************************!*\
+  !*** ./resources/js/components/Timer.vue?vue&type=template&id=54f9552c& ***!
+  \**************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Timer_vue_vue_type_template_id_54f9552c___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./Timer.vue?vue&type=template&id=54f9552c& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Timer.vue?vue&type=template&id=54f9552c&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Timer_vue_vue_type_template_id_54f9552c___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Timer_vue_vue_type_template_id_54f9552c___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

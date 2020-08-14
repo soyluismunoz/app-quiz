@@ -11,6 +11,9 @@ $factory->define(Quiz::class, function (Faker $faker) {
         'title'         => $name,
         'description'   => $faker->sentence(10),
         'slug'          => Str::slug($name),
-        'status'        => $faker->randomElement(['active', 'inactive']),
+        'hour'          => 0,
+        'min'           => rand(1, 5),
+        'seg'           => rand(0, 60),
+        'status'        => 'active'
     ];
 });

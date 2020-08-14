@@ -52,6 +52,12 @@ html, body {
     box-shadow: 0 0 3px 1px #BABABA;
 }
 
+.skipped .skipped-item{
+    cursor: pointer;
+    text-decoration: none;
+    color: #333333;
+}
+
 /* single quiz*/
 .full-height {
     height: 100vh;

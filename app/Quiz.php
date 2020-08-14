@@ -8,7 +8,7 @@ class Quiz extends Model
 {
     protected $table = 'quizzes';
 
-    protected $fillable = ['title', 'slug', 'description', 'status'];
+    protected $fillable = ['title', 'description', 'slug', 'hour', 'min', 'seg', 'status'];
 
     public function questions() {
         return $this->hasMany('App\Question', 'quiz_id', 'id');

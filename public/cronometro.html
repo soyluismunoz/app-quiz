@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pagination</title>
+</head>
+<body>
+
+    <button onclick="apagar()">Apagar</button>
+    <button onclick="cancelar()">Cancelar</button>
+    <div id="testdiv"></div>
+
+    <script>
+        var timout;
+        var hour = 0.30
+        var min = 10
+        var seg = 10
+        var n = (hour * 3600) + (min * 60) + seg;
+        var l = document.getElementById("testdiv");
+        
+        function apagar(){
+            timout=window.setInterval(function(){
+              l.innerHTML = "En "+ secondsToString(n) +" segundos se apagará el computador.";
+              n--;
+              if(n==0){
+                  apagado()
+              }
+            },1000);
+        }
+        
+        function apagado(){
+            clearTimeout(timout);
+            l.innerHTML = "computador apagado";
+        }
+        
+        function secondsToString(seconds) {
+            var hour = Math.floor(seconds / 3600);
+            hour = (hour < 10)? '0' + hour : hour;
+            
+            var minute = Math.floor((seconds / 60) % 60);
+            minute = (minute < 10)? '0' + minute : minute;
+            
+            var second = seconds % 60;
+            second = (second < 10)? '0' + second : second;
+            
+            return hour + ':' + minute + ':' + second;
+        }
+
+        function cancelar(){
+            clearTimeout(timout);
+            document.getElementById("testdiv").innerHTML="Operación cancelada.";
+        }
+    </script>
+</body>
+</html>

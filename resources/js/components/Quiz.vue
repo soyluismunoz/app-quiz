@@ -1,10 +1,26 @@
 <template>
     <section class="section quiz">
-        <div class="container">
+        <div class="container-fluid px-5">
             <div class="row justify-content-center">
-                <div class="col-lg-8 my-5">
+                <div class="col-lg-4 mt-5 skipped" v-if="skippedQues.length > 0">
+                    <div class="card shadow rounded">
+                        <div class="card-header text-center">
+                           <h3 class="card-title m-0">
+                               Preguntas Omitidas 
+                           </h3>
+                        </div>
+                       <div class="card-body p-0 overflow-auto" style="max-height:520px">
+                            <ul class="list-group list-group-flush">
+                                <a class="list-group-item list-group-item-action skipped-item" v-for="sQ in skippedQues" :key="sQ" @click="selectSkipped(sQ)">
+                                    {{ quiz.questions[sQ].title }}
+                                </a>
+                            </ul>
+                       </div>
+                    </div>
+                </div>
+                <div class="col-lg-8 mt-5">
                     <!--Quiz-->
-                    <div class="card shadow-lg rounded" v-if="!end">
+                    <div class="card shadow-lg rounded" v-if="questionIndex < quiz.questions.length" v-bind:key="questionIndex">
                         <div class="card-header text-center py-5">
                             <h2 class="font-weight-bold" v-text="quiz.title"></h2>
                             <!--progress-->
@@ -18,15 +34,9 @@
                             </div>
                             <!--/progress-->
                         </div>
-                        <div class="card-body text-center" v-if="quiz.questions.length > 0 ">
+                        <div class="card-body text-center" v-if="!load">
                             <div class="d-flex justify-content-end">
-                                <small> 
-                                    Tiempo para responder esta pregunta 
-                                    <b>
-                                       {{ quiz.questions[questionIndex].min}} :
-                                       {{ quiz.questions[questionIndex].seg }}
-                                    </b> 
-                                </small>
+                               <p> Tiempo para realizar la prueba <strong v-text="time"></strong></p>
                             </div>
                             <h2 class="card-title" v-text="quiz.questions[questionIndex].title"></h2>
                             <div class="row justify-content-center options">
@@ -35,6 +45,13 @@
                                 :class="{ 'is-selected': userResponses[questionIndex] == index}"
                                 >
                                    {{ a.answer }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body text-center" v-else>
+                            <div class="row justify-content-center" style="height: 250px;">
+                                <div class="col-lg-4 align-self-center">
+                                    <i class="fas fa-spinner fa-spin fa-6x"></i>
                                 </div>
                             </div>
                         </div>
@@ -54,11 +71,11 @@
                                     </li>
                                 </ul>
 
-                                <button class="btn rounded-pill" @click="next()"
-                                :class="(userResponses[questionIndex]==null)?'btn-secondary':'btn-success'" 
-                                :disabled="questionIndex>=quiz.questions.length"
-                                >
-                                    {{ (userResponses[questionIndex]==null)?'Omitir':'Siguiente' }}
+                                <button class="btn rounded-pill btn-success" @click="next()" v-if="userResponses[questionIndex]!=null">
+                                   Siguiente
+                                </button>
+                                <button v-else class="btn rounded-pill btn-secondary" @click="skip(questionIndex)">
+                                    Omitir
                                 </button>
 
                             </div>
@@ -66,7 +83,8 @@
                     </div>
 
                     <!--Result-->
-                    <div class="card shadow-lg rounded py-5" v-else>
+                    <div class="card shadow-lg rounded py-5" 
+                        v-if="questionIndex >= quiz.questions.length" v-bind:key="questionIndex">
                         <div class="align-self-center text-center">
                             <i class="fas" :class="score()>3?'fa-check-circle-o is-active':'fa-times-circle'"></i>
                             <hr>
@@ -97,15 +115,30 @@ export default {
     data(){
         return {
             questionIndex: 0,
-            userResponses: '',
+            skippedQues:[],
             end: false,
+            userResponses: '',
+            load: true,
+            time: "",
+            hour: "",
+            min: "",
+            seg: "",
             user: '',
-            quizLength : 10,
-            quiz: ''
+            quiz: {
+                questions: [
+                    {
+                        answers: [
+                            {
+                                answer: " "
+                            },
+                        ]
+                    },
+                ]
+            }
         }
     },
     mounted() {
-
+        var self = this
         var slug = localStorage.getItem('QuizSlug')
         if (slug) {
             try {
@@ -119,16 +152,31 @@ export default {
         }
         this.getQuiz(url)
         
-        this.userResponses = Array(this.quizLength.length).fill(null);
+        setTimeout(function(){
+           if(self.quiz){
+               //localStorage.removeItem('QuizSlug')
+               self.load = false
+            }
+            self.userResponses = Array(self.quiz.questions.length).fill(null)
+            console.log(self.userResponses)
+            self.takeTime()
+        }, 1000)
+       
     },
     methods:{
         // pagination
         next() {
             if (this.questionIndex < this.quiz.questions.length){
                  this.questionIndex++;
-            }else{
-                this.score()
             }
+        },
+        skip(index){
+            this.skippedQues.push(index)
+            this.next()
+            console.log(index)
+        },
+        selectSkipped(index){
+            this.questionIndex = index
         },
         prev() {
             if (this.quiz.questions.length > 0) this.questionIndex--;
@@ -136,36 +184,30 @@ export default {
         goQuestion(index){
             this.questionIndex = index
         },
-
         restart(){
             this.questionIndex=0;
             this.userResponses=Array(this.quiz.questions.length).fill(null);
-            this.end = false
         },
 
         // select answer
         selectAnswer(index) {
             Vue.set(this.userResponses, this.questionIndex, index);
-            console.log(this.userResponses);
+            console.log(this.userResponses)
         },
 
         // End and final score
         score() {
-            this.end = true
+            this.skippedQues = []
             var score = 0;
             var i = 0;
-            for ( i < this.userResponses.length; i++; ) {
-                if (
-                    typeof this.quiz.questions[i].answers[
-                        this.userResponses[i]
-                    ] !== "undefined" &&
-                    this.quiz.questions[i].answers[this.userResponses[i]].correct
-                ) {
+            for (let i = 0; i < this.userResponses.length; i++) {
+                if (typeof this.quiz.questions[i].answers[this.userResponses[i]] !== "undefined" && 
+                    this.quiz.questions[i].answers[this.userResponses[i]].correct != 0) 
+                {
                     score = score + 1;
                 }
             }
             return score;
-
             return this.userResponses.filter(function(val) { return val }).length;
         },
 
@@ -174,10 +216,43 @@ export default {
             axios.get('/show-quiz/' + url).then(response => {
                 this.quiz = response.data.quiz
                 this.user = response.data.user
+                this.hour = response.data.quiz.hour
+                this.min = response.data.quiz.min
+                this.seg = response.data.quiz.seg
                 //localStorage.removeItem('QuizSlug')
             }).catch(e => {
                 console.log(e)
             })
+        },
+
+        // Temporizador
+        takeTime(){
+            var timeout;
+            var self = this
+            var hour = self.hour
+            var min = self.min
+            var seg = self.seg
+            var n = (hour * 3600) + (min * 60) + seg;
+            timeout=window.setInterval(function(){
+                self.secondsToString(n)
+                n--;
+                if(n == 0){
+                    clearTimeout(timeout)
+                    self.questionIndex = self.quiz.questions.length
+                }
+            },1000);
+        },
+        secondsToString(seconds) {
+            var hour = Math.floor(seconds / 3600);
+            hour = (hour < 10)? '0' + hour : hour;
+            
+            var minute = Math.floor((seconds / 60) % 60);
+            minute = (minute < 10)? '0' + minute : minute;
+            
+            var second = seconds % 60;
+            second = (second < 10)? '0' + second : second;
+            
+            this.time = hour + ':' + minute + ':' + second ;
         }
     }
 }
