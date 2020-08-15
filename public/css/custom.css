@@ -29,6 +29,7 @@ html, body {
 /* single quiz*/
 .quiz{
     background-color: #CFD8DC;
+    min-height: 100vh;
 }
 
 .quiz .option{

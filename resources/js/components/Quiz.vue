@@ -1,24 +1,8 @@
 <template>
-    <section class="section quiz">
-        <div class="container-fluid px-5">
+    <section class="section quiz py-5">
+        <div class="container-fluid px-lg-5">
             <div class="row justify-content-center">
-                <div class="col-lg-4 mt-5 skipped" v-if="skippedQues.length > 0">
-                    <div class="card shadow rounded">
-                        <div class="card-header text-center">
-                           <h3 class="card-title m-0">
-                               Preguntas Omitidas 
-                           </h3>
-                        </div>
-                       <div class="card-body p-0 overflow-auto" style="max-height:520px">
-                            <ul class="list-group list-group-flush">
-                                <a class="list-group-item list-group-item-action skipped-item" v-for="sQ in skippedQues" :key="sQ" @click="selectSkipped(sQ)">
-                                    {{ quiz.questions[sQ].title }}
-                                </a>
-                            </ul>
-                       </div>
-                    </div>
-                </div>
-                <div class="col-lg-8 mt-5">
+                <div class="col-lg-8 mt-5 order-lg-1">
                     <!--Quiz-->
                     <div class="card shadow-lg rounded" v-if="questionIndex < quiz.questions.length" v-bind:key="questionIndex">
                         <div class="card-header text-center py-5">
@@ -61,16 +45,6 @@
                                     Anterior
                                 </button>
 
-                                <ul class="pagination m-0">
-                                    <li class="page-item" aria-current="page" :id="'act-' + index" 
-                                    :class="(index == questionIndex)?'active': ''"
-                                    v-for="(r, index) in quiz.questions.length " :key="r.index">
-                                        <a class="page-link" @click="goQuestion(index)">
-                                            {{ index + 1 }}
-                                        </a>
-                                    </li>
-                                </ul>
-
                                 <button class="btn rounded-pill btn-success" @click="next()" v-if="userResponses[questionIndex]!=null">
                                    Siguiente
                                 </button>
@@ -86,13 +60,15 @@
                     <div class="card shadow-lg rounded py-5" 
                         v-if="questionIndex >= quiz.questions.length" v-bind:key="questionIndex">
                         <div class="align-self-center text-center">
-                            <i class="fas" :class="score()>3?'fa-check-circle-o is-active':'fa-times-circle'"></i>
+                            <h2 class="card-title text-center" v-text="quizFinished"></h2>
                             <hr>
+                            <i class="far fa-5x " 
+                            :class=" finalScore > quiz.approve_with?'text-success fa-check-circle is-active':'fa-times-circle text-danger'"></i>
                             <h3>
-                                You did {{ score()> 7?'Asombroso': 'Mejor suerte luego' }} {{ score() > 4?'a good':'a poor'}} job!
+                                {{ finalScore > quiz.approve_with? quiz.if_approve : quiz.if_fail }}
                             </h3>
                             <p>
-                               Puntuacion total : {{ score() }} / {{ quiz.questions.length }}
+                               Puntuacion total : {{ finalScore }} / {{ quiz.questions.length }}
                             </p>
                             <button class="btn btn-primary" @click="restart()">
                                 Reiniciar <i class="fas fa-refresh"></i>
@@ -100,12 +76,29 @@
                         </div>
                     </div>
                 </div>
+                <!--skipped questions-->
+                <div class="col-lg-4 mt-5 skipped order-lg-0" v-if="skippedQues.length > 0">
+                    <div class="card shadow rounded">
+                        <div class="card-header text-center">
+                           <h3 class="card-title m-0">
+                               Preguntas Omitidas 
+                           </h3>
+                        </div>
+                       <div class="card-body p-0 overflow-auto" style="max-height:520px">
+                            <ul class="list-group list-group-flush">
+                                <a class="list-group-item list-group-item-action skipped-item" v-for="sQ in skippedQues" :key="sQ" @click="selectSkipped(sQ)">
+                                    {{ quiz.questions[sQ].title }}
+                                </a>
+                            </ul>
+                       </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="row p-5">
-            <pre>
-                {{ $data }}
-            </pre>
+            <div class="row">
+                <pre>
+                    {{ $data }}
+                </pre>
+            </div>
         </div>
     </section>
 </template>
@@ -116,7 +109,7 @@ export default {
         return {
             questionIndex: 0,
             skippedQues:[],
-            end: false,
+            finalScore: 0,
             userResponses: '',
             load: true,
             time: "",
@@ -124,6 +117,7 @@ export default {
             min: "",
             seg: "",
             user: '',
+            quizFinished: 'Haz Finalizado el examen de certificacion',
             quiz: {
                 questions: [
                     {
@@ -154,7 +148,7 @@ export default {
         
         setTimeout(function(){
            if(self.quiz){
-               //localStorage.removeItem('QuizSlug')
+               localStorage.removeItem('QuizSlug')
                self.load = false
             }
             self.userResponses = Array(self.quiz.questions.length).fill(null)
@@ -169,6 +163,10 @@ export default {
             if (this.questionIndex < this.quiz.questions.length){
                  this.questionIndex++;
             }
+            if(this.questionIndex >= this.quiz.questions.length){
+                this.score()
+                this.addResult()
+            }
         },
         skip(index){
             this.skippedQues.push(index)
@@ -181,11 +179,9 @@ export default {
         prev() {
             if (this.quiz.questions.length > 0) this.questionIndex--;
         },
-        goQuestion(index){
-            this.questionIndex = index
-        },
         restart(){
             this.questionIndex=0;
+            this.takeTime()
             this.userResponses=Array(this.quiz.questions.length).fill(null);
         },
 
@@ -196,8 +192,7 @@ export default {
         },
 
         // End and final score
-        score() {
-            this.skippedQues = []
+        score(){
             var score = 0;
             var i = 0;
             for (let i = 0; i < this.userResponses.length; i++) {
@@ -207,8 +202,9 @@ export default {
                     score = score + 1;
                 }
             }
-            return score;
-            return this.userResponses.filter(function(val) { return val }).length;
+            this.skippedQues.length = 0
+            this.finalScore = score
+            this.userResponses.filter(function(val) { return val }).length;
         },
 
         // Get Quiz, Questions, Answer and User
@@ -225,6 +221,22 @@ export default {
             })
         },
 
+        addResult(){
+            let formData = new FormData()
+
+            formData.append('quizId', this.quiz.id)
+            formData.append('userId', this.user.id)
+            formData.append('questionsCount', this.quiz.questions.length)
+            formData.append('correctAnswers', this.finalScore)
+
+            let url = '/addResult'
+            axios.post(url, formData).then(response => {
+                console.log(response.status)
+            }).catch(error => {
+                console.log(error.response.data.message)
+            });
+        },
+
         // Temporizador
         takeTime(){
             var timeout;
@@ -236,9 +248,10 @@ export default {
             timeout=window.setInterval(function(){
                 self.secondsToString(n)
                 n--;
-                if(n == 0){
+                if(n <= 0){
                     clearTimeout(timeout)
                     self.questionIndex = self.quiz.questions.length
+                    self.quizFinished = "Se te ha agotado el tiempo"
                 }
             },1000);
         },

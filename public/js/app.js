@@ -2013,19 +2013,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       questionIndex: 0,
       skippedQues: [],
-      end: false,
+      finalScore: 0,
       userResponses: '',
       load: true,
       time: "",
@@ -2033,6 +2026,7 @@ __webpack_require__.r(__webpack_exports__);
       min: "",
       seg: "",
       user: '',
+      quizFinished: 'Haz Finalizado el examen de certificacion',
       quiz: {
         questions: [{
           answers: [{
@@ -2060,7 +2054,7 @@ __webpack_require__.r(__webpack_exports__);
     this.getQuiz(url);
     setTimeout(function () {
       if (self.quiz) {
-        //localStorage.removeItem('QuizSlug')
+        localStorage.removeItem('QuizSlug');
         self.load = false;
       }
 
@@ -2075,6 +2069,11 @@ __webpack_require__.r(__webpack_exports__);
       if (this.questionIndex < this.quiz.questions.length) {
         this.questionIndex++;
       }
+
+      if (this.questionIndex >= this.quiz.questions.length) {
+        this.score();
+        this.addResult();
+      }
     },
     skip: function skip(index) {
       this.skippedQues.push(index);
@@ -2087,11 +2086,9 @@ __webpack_require__.r(__webpack_exports__);
     prev: function prev() {
       if (this.quiz.questions.length > 0) this.questionIndex--;
     },
-    goQuestion: function goQuestion(index) {
-      this.questionIndex = index;
-    },
     restart: function restart() {
       this.questionIndex = 0;
+      this.takeTime();
       this.userResponses = Array(this.quiz.questions.length).fill(null);
     },
     // select answer
@@ -2101,7 +2098,6 @@ __webpack_require__.r(__webpack_exports__);
     },
     // End and final score
     score: function score() {
-      this.skippedQues = [];
       var score = 0;
       var i = 0;
 
@@ -2111,8 +2107,9 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
 
-      return score;
-      return this.userResponses.filter(function (val) {
+      this.skippedQues.length = 0;
+      this.finalScore = score;
+      this.userResponses.filter(function (val) {
         return val;
       }).length;
     },
@@ -2130,6 +2127,19 @@ __webpack_require__.r(__webpack_exports__);
         console.log(e);
       });
     },
+    addResult: function addResult() {
+      var formData = new FormData();
+      formData.append('quizId', this.quiz.id);
+      formData.append('userId', this.user.id);
+      formData.append('questionsCount', this.quiz.questions.length);
+      formData.append('correctAnswers', this.finalScore);
+      var url = '/addResult';
+      axios.post(url, formData).then(function (response) {
+        console.log(response.status);
+      })["catch"](function (error) {
+        console.log(error.response.data.message);
+      });
+    },
     // Temporizador
     takeTime: function takeTime() {
       var timeout;
@@ -2142,9 +2152,10 @@ __webpack_require__.r(__webpack_exports__);
         self.secondsToString(n);
         n--;
 
-        if (n == 0) {
+        if (n <= 0) {
           clearTimeout(timeout);
           self.questionIndex = self.quiz.questions.length;
+          self.quizFinished = "Se te ha agotado el tiempo";
         }
       }, 1000);
     },
@@ -37845,55 +37856,10 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("section", { staticClass: "section quiz" }, [
-    _c("div", { staticClass: "container-fluid px-5" }, [
+  return _c("section", { staticClass: "section quiz py-5" }, [
+    _c("div", { staticClass: "container-fluid px-lg-5" }, [
       _c("div", { staticClass: "row justify-content-center" }, [
-        _vm.skippedQues.length > 0
-          ? _c("div", { staticClass: "col-lg-4 mt-5 skipped" }, [
-              _c("div", { staticClass: "card shadow rounded" }, [
-                _vm._m(0),
-                _vm._v(" "),
-                _c(
-                  "div",
-                  {
-                    staticClass: "card-body p-0 overflow-auto",
-                    staticStyle: { "max-height": "520px" }
-                  },
-                  [
-                    _c(
-                      "ul",
-                      { staticClass: "list-group list-group-flush" },
-                      _vm._l(_vm.skippedQues, function(sQ) {
-                        return _c(
-                          "a",
-                          {
-                            key: sQ,
-                            staticClass:
-                              "list-group-item list-group-item-action skipped-item",
-                            on: {
-                              click: function($event) {
-                                return _vm.selectSkipped(sQ)
-                              }
-                            }
-                          },
-                          [
-                            _vm._v(
-                              "\n                                " +
-                                _vm._s(_vm.quiz.questions[sQ].title) +
-                                "\n                            "
-                            )
-                          ]
-                        )
-                      }),
-                      0
-                    )
-                  ]
-                )
-              ])
-            ])
-          : _vm._e(),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-lg-8 mt-5" }, [
+        _c("div", { staticClass: "col-lg-8 mt-5 order-lg-1" }, [
           _vm.questionIndex < _vm.quiz.questions.length
             ? _c(
                 "div",
@@ -38006,7 +37972,7 @@ var render = function() {
                         )
                       ])
                     : _c("div", { staticClass: "card-body text-center" }, [
-                        _vm._m(1)
+                        _vm._m(0)
                       ]),
                   _vm._v(" "),
                   _c("div", { staticClass: "card-footer" }, [
@@ -38030,47 +37996,6 @@ var render = function() {
                               "\n                                Anterior\n                            "
                             )
                           ]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "ul",
-                          { staticClass: "pagination m-0" },
-                          _vm._l(_vm.quiz.questions.length, function(r, index) {
-                            return _c(
-                              "li",
-                              {
-                                key: r.index,
-                                staticClass: "page-item",
-                                class:
-                                  index == _vm.questionIndex ? "active" : "",
-                                attrs: {
-                                  "aria-current": "page",
-                                  id: "act-" + index
-                                }
-                              },
-                              [
-                                _c(
-                                  "a",
-                                  {
-                                    staticClass: "page-link",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.goQuestion(index)
-                                      }
-                                    }
-                                  },
-                                  [
-                                    _vm._v(
-                                      "\n                                        " +
-                                        _vm._s(index + 1) +
-                                        "\n                                    "
-                                    )
-                                  ]
-                                )
-                              ]
-                            )
-                          }),
-                          0
                         ),
                         _vm._v(" "),
                         _vm.userResponses[_vm.questionIndex] != null
@@ -38122,32 +38047,37 @@ var render = function() {
                 },
                 [
                   _c("div", { staticClass: "align-self-center text-center" }, [
-                    _c("i", {
-                      staticClass: "fas",
-                      class:
-                        _vm.score() > 3
-                          ? "fa-check-circle-o is-active"
-                          : "fa-times-circle"
+                    _c("h2", {
+                      staticClass: "card-title text-center",
+                      domProps: { textContent: _vm._s(_vm.quizFinished) }
                     }),
                     _vm._v(" "),
                     _c("hr"),
                     _vm._v(" "),
+                    _c("i", {
+                      staticClass: "far fa-5x ",
+                      class:
+                        _vm.finalScore > _vm.quiz.approve_with
+                          ? "text-success fa-check-circle is-active"
+                          : "fa-times-circle text-danger"
+                    }),
+                    _vm._v(" "),
                     _c("h3", [
                       _vm._v(
-                        "\n                            You did " +
+                        "\n                            " +
                           _vm._s(
-                            _vm.score() > 7 ? "Asombroso" : "Mejor suerte luego"
+                            _vm.finalScore > _vm.quiz.approve_with
+                              ? _vm.quiz.if_approve
+                              : _vm.quiz.if_fail
                           ) +
-                          " " +
-                          _vm._s(_vm.score() > 4 ? "a good" : "a poor") +
-                          " job!\n                        "
+                          "\n                        "
                       )
                     ]),
                     _vm._v(" "),
                     _c("p", [
                       _vm._v(
                         "\n                           Puntuacion total : " +
-                          _vm._s(_vm.score()) +
+                          _vm._s(_vm.finalScore) +
                           " / " +
                           _vm._s(_vm.quiz.questions.length) +
                           "\n                        "
@@ -38173,28 +38103,63 @@ var render = function() {
                 ]
               )
             : _vm._e()
+        ]),
+        _vm._v(" "),
+        _vm.skippedQues.length > 0
+          ? _c("div", { staticClass: "col-lg-4 mt-5 skipped order-lg-0" }, [
+              _c("div", { staticClass: "card shadow rounded" }, [
+                _vm._m(1),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "card-body p-0 overflow-auto",
+                    staticStyle: { "max-height": "520px" }
+                  },
+                  [
+                    _c(
+                      "ul",
+                      { staticClass: "list-group list-group-flush" },
+                      _vm._l(_vm.skippedQues, function(sQ) {
+                        return _c(
+                          "a",
+                          {
+                            key: sQ,
+                            staticClass:
+                              "list-group-item list-group-item-action skipped-item",
+                            on: {
+                              click: function($event) {
+                                return _vm.selectSkipped(sQ)
+                              }
+                            }
+                          },
+                          [
+                            _vm._v(
+                              "\n                                " +
+                                _vm._s(_vm.quiz.questions[sQ].title) +
+                                "\n                            "
+                            )
+                          ]
+                        )
+                      }),
+                      0
+                    )
+                  ]
+                )
+              ])
+            ])
+          : _vm._e()
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "row" }, [
+        _c("pre", [
+          _vm._v("                " + _vm._s(_vm.$data) + "\n            ")
         ])
       ])
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "row p-5" }, [
-      _c("pre", [_vm._v("            " + _vm._s(_vm.$data) + "\n        ")])
     ])
   ])
 }
 var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "card-header text-center" }, [
-      _c("h3", { staticClass: "card-title m-0" }, [
-        _vm._v(
-          "\n                           Preguntas Omitidas \n                       "
-        )
-      ])
-    ])
-  },
   function() {
     var _vm = this
     var _h = _vm.$createElement
@@ -38211,6 +38176,18 @@ var staticRenderFns = [
         ])
       ]
     )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "card-header text-center" }, [
+      _c("h3", { staticClass: "card-title m-0" }, [
+        _vm._v(
+          "\n                           Preguntas Omitidas \n                       "
+        )
+      ])
+    ])
   }
 ]
 render._withStripped = true

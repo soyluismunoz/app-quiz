@@ -17,6 +17,9 @@ class CreateQuizzesTable extends Migration
             $table->bigIncrements('id');
             $table->string('title')->nullable();
             $table->string('description')->nullable();
+            $table->integer('approve_with')->nullable();
+            $table->string('if_approve')->nullable();
+            $table->string('if_fail')->nullable();
             $table->string('slug')->nullable();
             $table->integer('hour')->unsigned()->default(0);
             $table->integer('min')->unsigned()->default(1);

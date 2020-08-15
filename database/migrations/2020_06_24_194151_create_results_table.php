@@ -15,15 +15,16 @@ class CreateResultsTable extends Migration
     {
         Schema::create('results', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('participant_id')->unsigned()->nullable();
+            $table->bigInteger('user_id')->unsigned()->nullable();
             $table->bigInteger('quiz_id')->unsigned()->nullable();
             $table->bigInteger('correct_answers')->unsigned()->nullable()->default(0);
             $table->bigInteger('questions_count')->unsigned()->nullable();
             $table->timestamps();
 
-            $table->index('participant_id');
+            $table->index('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            
             $table->index('quiz_id');
-            $table->foreign('participant_id')->references('id')->on('participants')->onDelete('cascade');
             $table->foreign('quiz_id')->references('id')->on('quizzes')->onDelete('cascade');
         });
     }

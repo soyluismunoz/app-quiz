@@ -30,11 +30,8 @@ Route::group(['middleware' => ['auth']], function () {
     // api - routes
     Route::get('all-quizes-act', 'QuizController@getQuizes');
     Route::get('show-quiz/{slug}', 'QuizController@getQuiz');
+    
+    Route::post('addResult', 'QuizController@storeResult')->name('result');
  });
 
-Route::get('/registro-participante', function () {
-    return view('participant');
-})->name('participant');
-
-Route::post('/add-participant', 'ParticipantController@addParticipant')->name('addParticipant');
 

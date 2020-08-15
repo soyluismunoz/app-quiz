@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Quiz;
+use App\Result;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -24,22 +25,22 @@ class QuizController extends Controller
         ];
     }
 
-    public function store(Request $request)
-    {
-        //
+    public function storeResult(Request $request){
+        $quiz = $request->quizId;
+        $user = $request->userId;
+        $questionsCount = $request->questionsCount;
+        $correctAnswers = $request->correctAnswers;
+
+        $result = new Result([
+            'user_id'           => $user,
+            'quiz_id'           => $quiz,
+            'correct_answers'   => $correctAnswers,
+            'questions_count'   => $questionsCount
+        ]);
+        $result->save();
+
+        return $result;
     }
-
-
-    public function show(Quiz $quiz)
-    {
-        //
-    }
-
-    public function edit(Quiz $quiz)
-    {
-        //
-    }
-
 
     public function update(Request $request, Quiz $quiz)
     {

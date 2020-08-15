@@ -8,12 +8,14 @@ class Result extends Model
 {
     protected $table = 'results';
 
+    protected $fillable = ['user_id', 'quiz_id', 'correct_answers', 'questions_count'];
+
     public function topic(){
         return $this->belongsTo('App\Quiz');
     }
 
-    public function participant() {
-        return $this->hasOne('App\Participant', 'id', 'participant_id');
+    public function user() {
+        return $this->hasOne('App\User', 'id', 'user_id');
     }
 
     /*public function options() {
