@@ -10,7 +10,7 @@ class Result extends Model
 
     protected $fillable = ['user_id', 'quiz_id', 'correct_answers', 'questions_count'];
 
-    public function topic(){
+    public function quiz(){
         return $this->belongsTo('App\Quiz');
     }
 

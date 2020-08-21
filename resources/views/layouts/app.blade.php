@@ -16,12 +16,13 @@
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
-    <!--icons-->
+    <!-- Icons -->
+    <link href="{{ asset('admin/vendor/nucleo/css/nucleo.css') }}" rel="stylesheet">
     <link href="{{ asset('css/fontawesome/css/all.css') }}" rel="stylesheet">
 
     <!-- Styles -->
-    <link href="{{ asset('/css/app.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
+    <link type="text/css" href="{{ asset('admin/css/argon.css?v=1.0.0') }}" rel="stylesheet">
+    <link type="text/css" href="{{ asset('css/custom.css') }}" rel="stylesheet">
 </head>
 <body>
     <div id="app">
@@ -51,18 +52,29 @@
                         <!-- Authentication Links -->
                         @guest
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('login') }}">{{ __('Iniciar Sesion') }}</a>
+                                <a class="nav-link nav-link-icon" href="{{ route('login') }}">
+                                    <i class="ni ni-key-25"></i>
+                                    <span class="nav-link-inner--text">{{ __('Iniciar Sesion') }}</span>
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('register') }}">{{ __('Registrarse') }}</a>
+                                <a class="nav-link nav-link-icon" href="{{ route('register') }}">
+                                    <i class="ni ni-circle-08"></i>
+                                    <span class="nav-link-inner--text">{{ __('Registrarse') }}</span>
+                                </a>
                             </li>
                         @else
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('home') }}">{{ __('Quizes') }}</a>
+                                <a class="nav-link nav-link-icon" href="{{ route('home') }}">
+                                    <i class="ni ni-planet"></i>
+                                    <span class="nav-link-inner--text">{{ __('Quizes') }}</span>
+                                </a>
                             </li>
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ Auth::user()->name }} <span class="caret"></span>
+                                <a id="navbarDropdown" class="nav-link nav-link-icon dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                    <i class="ni ni-single-02"></i>
+                                    <span class="nav-link-inner--text">{{ Auth::user()->name }}</span>
+                                    <span class="caret"></span>
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">

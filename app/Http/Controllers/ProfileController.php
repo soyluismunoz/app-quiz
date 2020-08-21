@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\ProfileRequest;
 use App\Http\Requests\PasswordRequest;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
+    public function __construct() {
+        $this->middleware('admin');
+    }
     /**
      * Show the form for editing the profile.
      *
@@ -27,8 +30,7 @@ class ProfileController extends Controller
     public function update(ProfileRequest $request)
     {
         auth()->user()->update($request->all());
-
-        return back()->withStatus(__('Profile successfully updated.'));
+        return back()->withStatus(__('Perfil actualizado correctamente.'));
     }
 
     /**
@@ -40,7 +42,6 @@ class ProfileController extends Controller
     public function password(PasswordRequest $request)
     {
         auth()->user()->update(['password' => Hash::make($request->get('password'))]);
-
-        return back()->withPasswordStatus(__('Password successfully updated.'));
+        return back()->withPasswordStatus(__('Contraseña actualizada.'));
     }
 }

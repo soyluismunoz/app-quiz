@@ -17,6 +17,6 @@ $factory->define(Quiz::class, function (Faker $faker) {
         'hour'          => 0,
         'min'           => rand(1, 5),
         'seg'           => rand(0, 60),
-        'status'        => 'active'
+        'status'        => $faker->randomElement(['inactive', 'active'])
     ];
 });
