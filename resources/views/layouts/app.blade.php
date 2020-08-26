@@ -9,6 +9,9 @@
 
     <title>{{ config('app.name', 'Certificaciones') }}</title>
 
+    <!-- Favicon -->
+    <link href="{{ asset('admin/img/brand/favicon.png') }}" rel="icon" type="image/png">
+
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
 
@@ -31,7 +34,7 @@
             <div class="container">
                 @guest
                     <a class="navbar-brand" href="{{ url('/') }}">
-                        {{ config('app.name', 'Laravel') }}
+                         {{ config('app.name', 'Laravel') }}
                     </a>
                 @else
                     <a class="navbar-brand" href="{{ route('home') }}">
