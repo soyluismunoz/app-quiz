@@ -2,7 +2,7 @@
 
 ## Sobre Certificaciones
 
-Es una web app en donde crear pequenos quiz en donde podras asignarle distintas caracteristicas a cada uno de ellos, algunas caracteristicas son asignarle un tiempo limite para realizar la certificacion, crear mensaje en caso de que apruebe, y en caso de de que repruebe, entre otras.
+Es una web app en donde crear pequenos quiz en donde podras asignarle distintas caracteristicas a cada uno de ellos, algunas caracteristicas son, asignarle un tiempo limite para realizar la certificacion, crear mensaje en caso de que apruebe, y en caso de de que repruebe, entre otras.
 
 ## Tecnologias utilizadas
 - PHP
@@ -11,14 +11,14 @@ Es una web app en donde crear pequenos quiz en donde podras asignarle distintas 
 - Vuejs 2.6
 - Bootstrap 4.5
 
-## Instalacion 
+## Instalación 
 
 Clonar repositorio
 ```
 git clone git@github.com:soyluismunoz/app-quiz.git
 ```
 
-Ir al la carpeta
+Ir a la carpeta
 ``` 
 cd app-quiz 
 ```
@@ -64,7 +64,7 @@ npm run dev
 
 Iniciar virtual server
 ```
-php artisan serves
+php artisan server
 ```
 ## Capturas 
 ![captura](https://i.imgur.com/ut47YiT.png)
