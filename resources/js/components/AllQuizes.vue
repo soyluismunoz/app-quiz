@@ -3,10 +3,11 @@
         <div class="col">
             <div class="card shadow">
                 <div class="card-header border-0">
-                    <div class="row align-items-center">
-                        <div class="col-8">
-                            <h3 class="mb-0">Quizes</h3>
-                        </div>
+                    <div class="d-flex justify-content-between">
+                        <h3 class="mb-0">Quizes</h3>
+                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#addQuiz">
+                            Nuevo Quiz
+                        </button>
                     </div>
                 </div>
 
@@ -75,13 +76,14 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="view" tabindex="-1" aria-hidden="true">
+        <!--View Quiz-->
+        <div class="modal fade" id="view" tabindex="-1" aria-hidden="true" data-backdrop="static" data-keyboard="false">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3 class="modal-title">{{ title }}</h3>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true" @click="clear()">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
@@ -116,8 +118,84 @@
                         </ul>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="clear()">Cerrar</button>
                         <a class="btn btn-warning text-white" @click="editQuiz(id)">Editar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Add Quiz-->
+        <div class="modal fade" id="addQuiz" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header border">
+                        <h5 class="modal-title" id="staticBackdropLabel">Nuevo</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true" @click="clear()">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="title">Titulo</label>
+                                    <input type="text" name="title" id="title" class="form-control" v-model="title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="description">Descripción</label>
+                                    <textarea required class="form-control" name="description" id="description" rows="3" v-model="description"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tiempo limite</label>
+                                    <div class="row">
+                                        <div class="col">
+                                            <input required type="number" class="form-control" placeholder="Horas" v-model="hour">
+                                        </div>
+                                        <div class="col">
+                                            <input required type="number" class="form-control" placeholder="Minutos" v-model="min">
+                                        </div>
+                                        <div class="col">
+                                            <input required type="number" class="form-control" placeholder="Segundos" v-model="seg">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="IfApprove">Si aprueba</label>
+                                    <input required type="text" name="IfApprove" id="IfApprove" class="form-control" v-model="if_approve">
+                                </div>
+                                <div class="form-group">
+                                    <label for="IfFail">Si Reprueba</label>
+                                    <input required type="text" name="IfFail" id="IfFail" class="form-control" v-model="if_fail"> 
+                                </div>
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="approve_with">Minimo para aprobar</label>
+                                            <a type="button" class="btn-sm" title="Minima cantidad de preguntas correctas para aprobar">
+                                                <i class="fas fa-question-circle "></i>
+                                            </a>
+                                            <input required type="number" id="approve_with" class="form-control" v-model="approve_with"> 
+                                        </div>
+                                        <div class="col">
+                                            <label for="status">Status</label>
+                                            <select class="custom-select" id="status" v-model="status">
+                                                <option value="inactive" selected>Inactive</option>
+                                                <option value="active">Active</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div class="modal-footer border-rounded">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="clear()">Cerrar</button>
+                        <button @click="addQuiz()" class="btn btn-success" >
+                            {{ isCreating? 'Guardando': 'Guardar' }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -135,9 +213,13 @@
                 approve_with: '',
                 if_approve : '',
                 if_fail: '',
+                hour: '',
+                min: '',
+                seg: '',
                 slug: '',
                 time: '',
-                status: '',
+                status: 'inactive',
+                isCreating: false,
                 questions: '',
                 lastPage: 0,
                 page: 0,
@@ -167,6 +249,21 @@
                 this.status = quiz.status
                 this.questions = quiz.questions.length
             },
+            clear(){
+                this.id = ''
+                this.title = ''
+                this.description = ''
+                this.approve_with = ''
+                this.if_approve = ''
+                this.if_fail = ''
+                this.slug = ''
+                this.time = ''
+                this.hour = ''
+                this.min = ''
+                this.seg = ''
+                this.status = 'inactive'
+                this.questions = ''.length
+            },
             editQuiz(id){
                 var host = window.location.protocol + "//" + window.location.hostname
                 var href = "/dashboard/edit-quiz/" + id
@@ -175,7 +272,7 @@
             },
             deleteQuiz(id, index){
                 this.$swal({
-                    title: 'Esta acción es permanente',
+                    title: 'Se Borraran todas la preguntas y respuestas vinculadas',
                     text: "Esta Seguro?",
                     icon: 'warning',
                     showCancelButton: true,
@@ -197,6 +294,43 @@
                         console.log(error)
                     })
                 })
+            },
+
+            //add quiz
+            addQuiz(){
+                this.isCreating = true;
+                let formData = new FormData()
+
+                formData.append('title', this.title)
+                formData.append('description', this.description)
+                formData.append('approve_with', this.approve_with)
+                formData.append('if_approve', this.if_approve)
+                formData.append('if_fail', this.if_fail)
+                formData.append('hour', this.hour)
+                formData.append('min', this.min)
+                formData.append('seg', this.seg)
+                formData.append('status', this.status)
+                
+                let url = '/add-quiz'
+                axios.post(url, formData,).then(response => {
+                    this.$swal({
+                        icon: 'success',
+                        title: 'creacion Exitosa',
+                    });
+                    var quiz = response.data
+                    this.quizes.push(quiz)
+                    this.isCreating = false;
+                    this.clear()
+                }).catch(error => {
+                    this.$swal({
+                        icon: 'error',
+                        type: 'error',
+                        title: 'Oops...',
+                        text: 'Ha ocurrido un error durante el guardado'
+                    })
+                    this.isCreating = false;
+                    console.log(error.response.data.message)
+                });
             },
         },
         created(){

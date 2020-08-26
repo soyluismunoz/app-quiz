@@ -21,6 +21,7 @@
     <link href="{{ asset('css/fontawesome/css/all.css') }}" rel="stylesheet">
 
     <!-- Styles -->
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link type="text/css" href="{{ asset('admin/css/argon.css?v=1.0.0') }}" rel="stylesheet">
     <link type="text/css" href="{{ asset('css/custom.css') }}" rel="stylesheet">
 </head>
@@ -64,6 +65,14 @@
                                 </a>
                             </li>
                         @else
+                            @if(Auth::user()->role == 'admin')
+                                <li class="nav-item">
+                                    <a class="nav-link nav-link-icon" href="{{ route('dashboard') }}">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        <span class="nav-link-inner--text">{{ __('Dashboard') }}</span>
+                                    </a>
+                                </li>
+                            @endif
                             <li class="nav-item">
                                 <a class="nav-link nav-link-icon" href="{{ route('home') }}">
                                     <i class="ni ni-planet"></i>
@@ -81,7 +90,7 @@
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
+                                        {{ __('Cerrar sesion') }}
                                     </a>
 
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">

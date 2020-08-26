@@ -44,9 +44,9 @@ Route::group(['middleware' => ['auth']], function () {
         return view('quiz.auth.results');
     })->name('results');
 
-    Route::get('/dashboard/add-quiz', function () {
-        return view('quiz.auth.addQuiz');
-    })->name('addQuiz');
+    Route::get('/dashboard/edit-quiz/{id}', function () {
+        return view('quiz.auth.updateQuiz');
+    })->name('updateQuiz');
 
     Route::get('/dashboard/all-quizes', function () {
         return view('quiz.auth.allQuizes');
@@ -60,7 +60,19 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('all-quizes-dash', 'adminController@allQuizes');
 
     //create update and delete Quiz
+    Route::post('add-quiz', 'adminController@AddQuiz');
+    Route::get('edit-quiz/{id}', 'adminController@editQuiz');
+    Route::post('/update-quiz', 'adminController@updateQuiz');
     Route::delete('delete-quiz/{id}', 'adminController@deleteQuiz');
+
+    //create update and delete Question
+    Route::post('add-question', 'adminController@addQuestions');
+    Route::post('update-question', 'adminController@updateQues');
+    Route::delete('delete-question/{id}', 'adminController@deleteQuestion');
+
+    //
+    Route::post('add-answer', 'adminController@addAns');
+    Route::delete('delete-answer/{id}', 'adminController@deleteAnswers');
     
     //usuarios
     Route::get('/dashboard/usuarios', 'UserController@index')->name('user.index');

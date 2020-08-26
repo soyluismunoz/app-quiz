@@ -14,6 +14,7 @@ Vue.component('main-tables', require('./components/MainTables.vue').default);
 
 Vue.component('all-results', require('./components/Results.vue').default);
 Vue.component('all-quizes', require('./components/AllQuizes.vue').default);
+Vue.component('update-quiz', require('./components/UpdateQuiz.vue').default);
 
 const app = new Vue({
     el: '#app',

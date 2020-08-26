@@ -94,11 +94,6 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <pre>
-                    {{ $data }}
-                </pre>
-            </div>
         </div>
     </section>
 </template>

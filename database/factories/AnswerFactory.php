@@ -9,6 +9,6 @@ $factory->define(Answer::class, function (Faker $faker) {
     $name = $faker->sentence(3);    
     return [
         'answer'        => $name ,
-        'correct'       => rand(0, 1),
+        'correct'       => $faker->randomElement([false, true]),
     ];
 });

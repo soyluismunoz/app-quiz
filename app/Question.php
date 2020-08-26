@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Question extends Model
 {
     protected $table = 'questions';
-    protected $fillable = ['quiz_id', 'title', 'min', 'seg' ];
+    protected $fillable = ['quiz_id', 'title',];
 
     public function quiz() {
         return $this->hasOne('App\Quiz', 'id', 'quiz_id');

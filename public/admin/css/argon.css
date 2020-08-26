@@ -776,6 +776,9 @@ pre code
     {
         max-width: 1140px;
     }
+    .modal-xl {
+        max-width: 1140px !important;
+    }
 }
 
 .container-fluid
@@ -7222,7 +7225,7 @@ button.close
 
 @media (min-width: 992px)
 {
-    .modal-lg
+    .modal-lg, .modal-xl 
     {
         max-width: 800px;
     }
