@@ -66,6 +66,17 @@ Iniciar virtual server
 ```
 php artisan server
 ```
+##Demo
+**Url** : http://quiz-certifications.herokuapp.com/
+
+Usuario administrador
+**Email**: john@example.com
+**PASS**: 123456
+
+Usuario standar
+**Email**: jody@example.net
+**PASS**: 123456
+
 ## Capturas 
 ![captura](https://i.imgur.com/ut47YiT.png)
 ***
